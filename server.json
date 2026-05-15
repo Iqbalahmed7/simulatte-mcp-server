@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.iqbalahmed7/simulatte",
+  "description": "Run synthetic research studies from any MCP-compatible AI client. 25+ SKUs including Concept Viability, Claim Credibility, B2B Buying Committee, Depth Interview, and cross-study semantic search.",
+  "repository": {
+    "url": "https://github.com/Iqbalahmed7/simulatte-mcp-server",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@simulatte/mcp-server",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SIMULATTE_API_KEY",
+          "description": "Your Simulatte workspace API key (format: sim_live_…). Generate one at https://app.simulatte.io/settings/api-keys",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "SIMULATTE_API_URL",
+          "description": "Base URL of the Simulatte API. Defaults to https://app.simulatte.io/api — only override for self-hosted or staging environments.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "https://app.simulatte.io/api"
+        }
+      ]
+    }
+  ]
+}

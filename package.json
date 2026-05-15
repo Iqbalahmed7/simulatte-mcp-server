@@ -1,7 +1,24 @@
 {
   "name": "@simulatte/mcp-server",
   "version": "0.1.0",
+  "mcpName": "io.github.iqbalahmed7/simulatte",
   "description": "Simulatte MCP server — invoke synthetic research studies from any MCP-compatible AI client.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Iqbalahmed7/simulatte-mcp-server.git"
+  },
+  "homepage": "https://github.com/Iqbalahmed7/simulatte-mcp-server",
+  "bugs": {
+    "url": "https://github.com/Iqbalahmed7/simulatte-mcp-server/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "simulatte",
+    "synthetic-research",
+    "ai-research",
+    "claude"
+  ],
   "main": "dist/index.js",
   "bin": {
     "simulatte-mcp": "dist/index.js"
