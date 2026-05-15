@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "simulatte": {
+      "command": "npx",
+      "args": ["-y", "@simulatte/mcp-server"],
+      "env": {
+        "SIMULATTE_API_KEY": "sim_live_your_key_here"
+      }
+    }
+  }
+}
