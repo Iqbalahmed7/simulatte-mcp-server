@@ -15,12 +15,12 @@ Claude: [calls simulatte_run_study] → Results in 4 minutes.
 
 **One-off (no install):**
 ```bash
-SIMULATTE_API_KEY=sim_live_your_key npx @simulatte/mcp-server
+SIMULATTE_API_KEY=sim_live_your_key npx simulatte-mcp-server
 ```
 
 **Global install:**
 ```bash
-npm install -g @simulatte/mcp-server
+npm install -g simulatte-mcp-server
 SIMULATTE_API_KEY=sim_live_your_key simulatte-mcp
 ```
 
@@ -43,7 +43,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "simulatte": {
       "command": "npx",
-      "args": ["-y", "@simulatte/mcp-server"],
+      "args": ["-y", "simulatte-mcp-server"],
       "env": {
         "SIMULATTE_API_KEY": "sim_live_your_key_here"
       }
@@ -65,7 +65,7 @@ Edit `~/.cursor/mcp.json` (or your project's `.cursor/mcp.json`):
   "mcpServers": {
     "simulatte": {
       "command": "npx",
-      "args": ["-y", "@simulatte/mcp-server"],
+      "args": ["-y", "simulatte-mcp-server"],
       "env": {
         "SIMULATTE_API_KEY": "sim_live_your_key_here"
       }
@@ -86,7 +86,7 @@ In `~/.config/zed/settings.json`, add:
     "simulatte": {
       "command": {
         "path": "npx",
-        "args": ["-y", "@simulatte/mcp-server"],
+        "args": ["-y", "simulatte-mcp-server"],
         "env": {
           "SIMULATTE_API_KEY": "sim_live_your_key_here"
         }
