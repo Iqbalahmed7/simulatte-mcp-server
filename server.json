@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.iqbalahmed7/simulatte",
-  "description": "Run synthetic research studies from any MCP-compatible AI client. 25+ SKUs including Concept Viability, Claim Credibility, B2B Buying Committee, Depth Interview, and cross-study semantic search.",
+  "description": "Run synthetic research studies from any MCP client. 25+ SKUs + cross-study insights.",
   "repository": {
     "url": "https://github.com/Iqbalahmed7/simulatte-mcp-server",
     "source": "github"
