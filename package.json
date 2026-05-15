@@ -1,5 +1,5 @@
 {
-  "name": "simulatte-mcp-server",
+  "name": "@simulatte-io/mcp-server",
   "version": "0.1.0",
   "mcpName": "io.github.iqbalahmed7/simulatte",
   "description": "Simulatte MCP server — invoke synthetic research studies from any MCP-compatible AI client.",
