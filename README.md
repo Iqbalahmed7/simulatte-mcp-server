@@ -132,16 +132,111 @@ concept-viability · claim-credibility · brand-identity-test · message-resonan
 
 ---
 
+## Authentication
+
+### Preferred: per-customer API key
+
+Send your `sim_live_*` key in either of these headers — both are accepted:
+
+```
+x-api-key: sim_live_your_key_here
+# or
+Authorization: Bearer sim_live_your_key_here
+```
+
+### Deprecated: shared platform key
+
+The shared key `forge-prod-2026` (used in internal integrations before v0.4) is
+deprecated and **will be removed at v0.5**. If your integration sends
+`x-api-key: forge-prod-2026`, migrate to a `sim_live_*` per-customer key now.
+The worker logs a deprecation warning on every request that uses the shared key.
+
+---
+
+## Response headers
+
+Every successful `/v1/forge/*` and `/v1/iris/*` response includes these headers:
+
+| Header | Description |
+|--------|-------------|
+| `X-Simulatte-Credits-Used` | Credits charged for this request |
+| `X-Simulatte-Credits-Remaining` | Workspace credit balance after this charge |
+| `X-Simulatte-Spend-Warning` | Present only when your key has consumed ≥ 80% of its spend cap. Value: `"85%-of-cap-consumed"` (percentage varies). |
+
+### Sample curl showing all headers
+
+```bash
+curl -X POST https://forge-worker-production.up.railway.app/v1/forge/concept-viability \
+  -H "x-api-key: sim_live_your_key" \
+  -H "x-workspace-id: your-workspace-uuid" \
+  -H "Content-Type: application/json" \
+  -d '{"concept":"A sleep app for stressed parents","population_id":"default","sample_size":20}' \
+  -i
+```
+
+Expected response headers (2xx):
+```
+HTTP/2 201
+x-simulatte-credits-used: 28
+x-simulatte-credits-remaining: 472
+```
+
+If your key is at 85% of its spend cap:
+```
+x-simulatte-spend-warning: 85%-of-cap-consumed
+```
+
+---
+
+## Error reference
+
+| Status | `error` field | Meaning |
+|--------|--------------|---------|
+| `401` | `invalid_api_key` | Key not found, revoked, or expired |
+| `401` | (message) | Bearer JWT invalid or expired |
+| `402` | `key_spend_cap_exceeded` | Key has a spend cap and this request would exceed it. Body: `{"error":"key_spend_cap_exceeded","cap":500,"used":498,"would_charge":10}` |
+| `429` | `rate_limited` | 60 req/min or 1000 req/hr limit hit. Check `Retry-After` header |
+| `503` | `database_unavailable` | Worker DB not reachable — retry in 30s |
+
+### Sample error bodies
+
+**402 — spend cap exceeded:**
+```json
+{
+  "detail": {
+    "error": "key_spend_cap_exceeded",
+    "cap": 500,
+    "used": 498,
+    "would_charge": 10
+  }
+}
+```
+
+**429 — rate limited:**
+```json
+{
+  "detail": {
+    "error": "rate_limited",
+    "limit": "60/min",
+    "retry_after_seconds": 42
+  }
+}
+```
+`Retry-After: 42` header is also present.
+
+---
+
 ## Rate limits and quotas
 
-Rate limits and credit caps are enforced per API key based on your subscription tier:
+Rate limits and credit caps are enforced per API key:
 
-| Tier | Credits/mo | Rate limit |
-|------|-----------|------------|
-| Free | 50 | 10 req/hr |
-| Starter | 500 | 100 req/hr |
-| Growth | 5,000 | 500 req/hr |
-| Enterprise | Custom | Custom |
+| Default limit | Value |
+|---------------|-------|
+| Per-minute | 60 req/min |
+| Per-hour | 1,000 req/hr |
+
+Spend caps are optional, set per-key by workspace admins. A key with no spend
+cap has unlimited spend (bounded only by workspace credit balance).
 
 See [app.simulatte.io/settings/billing](https://app.simulatte.io/settings/billing) for your current usage.
 
