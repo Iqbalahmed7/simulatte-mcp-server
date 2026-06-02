@@ -35,5 +35,7 @@ export async function handleCreatePool(
   client: SimulatteClient,
   input: CreatePoolInput
 ): Promise<CreatePoolResponse> {
-  return client.post<CreatePoolResponse>("/v1/pools", input);
+  // BUG-MCP-COLD-DP-BROKEN-001 (2026-06-01): worker has POST /pools
+  // (no /v1/ prefix), status_code=201. v0.1.1 hit /v1/pools → 404.
+  return client.post<CreatePoolResponse>("/pools", input);
 }

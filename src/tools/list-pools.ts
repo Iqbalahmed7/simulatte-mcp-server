@@ -17,5 +17,9 @@ export async function handleListPools(
   client: SimulatteClient,
   _input: ListPoolsInput
 ): Promise<Pool[]> {
-  return client.get<Pool[]>("/v1/pools");
+  // BUG-MCP-COLD-DP-BROKEN-001 (2026-06-01): worker has GET /pools
+  // (no /v1/ prefix). v0.1.1 hit /v1/pools which returns 404.
+  // Worker response is { pools: Pool[] } — unwrap.
+  const res = await client.get<{ pools: Pool[] }>("/pools");
+  return res.pools ?? [];
 }
