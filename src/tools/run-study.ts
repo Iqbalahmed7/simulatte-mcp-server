@@ -11,7 +11,7 @@ export const runStudySchema = z.object({
     "price-sensitivity",
     "feature-priority",
     // "ad-copy" removed 2026-06-09 — ACT deprecated
-    "email-subject-test",  // EST v1 (2026-06-09)
+    // "email-subject-test",  // EST deferred to Phase 2 — founder 2026-06-09
     "b2b-committee",
     "conjoint",
     "iris-pulse",
