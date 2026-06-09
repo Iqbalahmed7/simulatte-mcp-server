@@ -7,7 +7,8 @@ export type StudySku =
   | "message-resonance"
   | "price-sensitivity"
   | "feature-priority"
-  | "ad-copy"
+  // "ad-copy" removed 2026-06-09 — ACT deprecated; use message-resonance or email-subject-test
+  | "email-subject-test"  // EST v1 (2026-06-09)
   | "b2b-committee"
   | "conjoint"
   | "iris-pulse"
@@ -82,7 +83,7 @@ export const SKU_CREDIT_COSTS: Record<StudySku, number> = {
   "message-resonance": 2,
   "price-sensitivity": 3,
   "feature-priority": 3,
-  "ad-copy": 2,
+  "email-subject-test": 2,  // EST v1 (2026-06-09)
   "b2b-committee": 5,
   "conjoint": 5,
   "iris-pulse": 2,

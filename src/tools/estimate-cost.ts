@@ -10,7 +10,8 @@ export const estimateCostSchema = z.object({
     "message-resonance",
     "price-sensitivity",
     "feature-priority",
-    "ad-copy",
+    // "ad-copy" removed 2026-06-09 — ACT deprecated
+    "email-subject-test",  // EST v1 (2026-06-09)
     "b2b-committee",
     "conjoint",
     "iris-pulse",
