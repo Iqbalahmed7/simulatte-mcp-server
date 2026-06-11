@@ -18,7 +18,7 @@ export const estimateCostSchema = z.object({
     "card-sort",
     "open-end",
     "ab-backlog",
-    "polarization-stress-test",
+    // "polarization-stress-test" folded into PreFlight v2 — task #210 PST-FOLD-001 (2026-06-11)
     "name-test",
     "founder-positioning",
     "ad-concept-resonance",

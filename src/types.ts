@@ -15,7 +15,8 @@ export type StudySku =
   | "card-sort"
   | "open-end"
   | "ab-backlog"
-  | "polarization-stress-test"
+  // "polarization-stress-test" folded into PreFlight v2 — task #210 PST-FOLD-001 (2026-06-11).
+  // Disabled from MCP surface; results page on console retained for historical studies.
   | "name-test"
   | "founder-positioning"
   | "ad-concept-resonance"
@@ -90,7 +91,7 @@ export const SKU_CREDIT_COSTS: Record<StudySku, number> = {
   "card-sort": 3,
   "open-end": 1,
   "ab-backlog": 2,
-  "polarization-stress-test": 4,
+  // "polarization-stress-test": 4,  // Folded into PreFlight v2 — task #210 (2026-06-11)
   "name-test": 2,
   "founder-positioning": 3,
   "ad-concept-resonance": 3,
