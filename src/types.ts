@@ -21,7 +21,7 @@ export type StudySku =
   | "founder-positioning"
   | "ad-concept-resonance"
   | "depth-interview"
-  | "custom-study"
+  // "custom-study" REMOVED 2026-07-05 — never live; use synthetic-survey instead
   | "iat"
   | "counterfactual-positioning"
   | "personalization-sensitivity"
@@ -76,34 +76,68 @@ export interface CostEstimate {
   usd_estimate: number;
 }
 
-// Credit cost table by SKU
-export const SKU_CREDIT_COSTS: Record<StudySku, number> = {
-  "concept-viability": 3,
-  "claim-credibility": 2,
-  "brand-identity-test": 4,
-  "message-resonance": 2,
-  "price-sensitivity": 3,
-  "feature-priority": 3,
-  // "email-subject-test": 2,  // EST deferred to Phase 2 — founder 2026-06-09
-  "b2b-committee": 5,
-  "conjoint": 5,
-  "iris-pulse": 2,
-  "card-sort": 3,
-  "open-end": 1,
-  "ab-backlog": 2,
-  // "polarization-stress-test": 4,  // Folded into PreFlight v2 — task #210 (2026-06-11)
-  "name-test": 2,
-  "founder-positioning": 3,
-  "ad-concept-resonance": 3,
-  "depth-interview": 8,
-  "custom-study": 5,
-  "iat": 4,
-  "counterfactual-positioning": 3,
-  "personalization-sensitivity": 3,
-  "regulated-claim-preflight": 5,
-  "volume-forecast": 6,
-  "brand-tracker": 4,
-  "creative-audit": 4,
+// -----------------------------------------------------------------------------
+// Bucket-based credit pricing — mirrors SIMULATTE CORE/pricing.yaml sku_buckets.
+// Formula: total_credits = base_credits + max(0, sample_size - 100)
+// (Bucket base is the floor for n<=100; +1 credit per additional persona.)
+// This replaces the pre-v3 flat SKU_CREDIT_COSTS table, which encoded
+// tiny per-persona rates that diverged from the executor's bucket-based
+// debit path and caused BUG-MR-PRICING-DRIFT-001.
+// -----------------------------------------------------------------------------
+
+export type Bucket = "pulse" | "light" | "standard" | "premium" | "heavy" | "heavy_vision" | "strategic";
+
+export const BUCKET_BASE_CREDITS: Record<Bucket, number> = {
+  pulse: 2000,
+  light: 3500,
+  standard: 5000,
+  premium: 8000,
+  heavy: 15000,
+  heavy_vision: 18000,      // Decision #50 — vision-LLM surcharge bucket
+  strategic: 30000,
 };
+
+export const SKU_BUCKET: Record<StudySku, Bucket> = {
+  // pulse
+  "open-end": "pulse",
+  "name-test": "pulse",
+  "card-sort": "pulse",
+  "depth-interview": "pulse",
+  // light
+  "concept-viability": "light",
+  "message-resonance": "light",
+  "feature-priority": "light",
+  "claim-credibility": "light",
+  // standard
+  "ad-concept-resonance": "standard",
+  "founder-positioning": "standard",
+  "ab-backlog": "standard",
+  "counterfactual-positioning": "standard",
+  // premium
+  "iat": "premium",
+  "price-sensitivity": "premium",
+  "b2b-committee": "premium",
+  "personalization-sensitivity": "premium",
+  // heavy
+  "creative-audit": "heavy",
+  "conjoint": "heavy",
+  "volume-forecast": "heavy",
+  "regulated-claim-preflight": "heavy",
+  // heavy_vision (Decision #50 — vision LLM surcharge)
+  "brand-identity-test": "heavy_vision",
+  // strategic
+  "brand-tracker": "strategic",
+  "iris-pulse": "strategic",
+};
+
+/**
+ * Compute total credits for a study run per pricing.yaml v3 bucket formula.
+ * base_credits + max(0, sample_size - 100). No scaling below n=100.
+ * For depth-interview (per-interview action billing), callers scale by turns.
+ */
+export function computeStudyCredits(sku: StudySku, sampleSize: number): number {
+  const base = BUCKET_BASE_CREDITS[SKU_BUCKET[sku]];
+  return base + Math.max(0, sampleSize - 100);
+}
 
 export const USD_PER_CREDIT = 0.012;

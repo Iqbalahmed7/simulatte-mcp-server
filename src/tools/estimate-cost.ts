@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { SKU_CREDIT_COSTS, USD_PER_CREDIT } from "../types.js";
-import type { CostEstimate } from "../types.js";
+import { BUCKET_BASE_CREDITS, SKU_BUCKET, USD_PER_CREDIT, computeStudyCredits } from "../types.js";
+import type { CostEstimate, StudySku } from "../types.js";
 
 export const estimateCostSchema = z.object({
   sku: z.enum([
@@ -53,20 +53,21 @@ export type EstimateCostInput = z.infer<typeof estimateCostSchema>;
 export const estimateCostTool = {
   name: "simulatte_estimate_cost",
   description:
-    "Estimate the credit cost and USD price for a Simulatte study before running it. Calculated locally — no API call needed. Credits = base_cost_per_persona × sample_size.",
+    "Estimate the credit cost and USD price for a Simulatte study before running it. Calculated locally — no API call needed. Credits = bucket_base + max(0, sample_size - 100), per pricing.yaml v3.",
   inputSchema: estimateCostSchema,
 };
 
 export function handleEstimateCost(input: EstimateCostInput): CostEstimate {
   const { sku, sample_size = 50, max_turns = 12 } = input;
-  const baseCreditsPerPersona = SKU_CREDIT_COSTS[sku];
 
   let credits: number;
   if (sku === "depth-interview") {
-    // depth interviews: base rate × turns multiplier
-    credits = Math.ceil(baseCreditsPerPersona * (max_turns / 12));
+    // depth interviews are billed per-interview action (pulse bucket),
+    // scaled by conversation turns rather than persona count.
+    const base = BUCKET_BASE_CREDITS[SKU_BUCKET[sku as StudySku]];
+    credits = Math.ceil(base * (max_turns / 12));
   } else {
-    credits = baseCreditsPerPersona * sample_size;
+    credits = computeStudyCredits(sku as StudySku, sample_size);
   }
 
   const usd_estimate = Math.round(credits * USD_PER_CREDIT * 100) / 100;
