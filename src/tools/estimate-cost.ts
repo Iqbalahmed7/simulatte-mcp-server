@@ -53,7 +53,7 @@ export type EstimateCostInput = z.infer<typeof estimateCostSchema>;
 export const estimateCostTool = {
   name: "simulatte_estimate_cost",
   description:
-    "Estimate the credit cost and USD price for a Simulatte study before running it. Calculated locally — no API call needed. Credits = bucket_base + max(0, sample_size - 100), per pricing.yaml v3.",
+    "Estimate the credit cost and USD price for a Simulatte study before running it. Calculated locally — no API call needed. Credits = bucket_base + max(0, sample_size - 100), per pricing.yaml v4 (USD at the Try-pack list rate, $0.030/credit).",
   inputSchema: estimateCostSchema,
 };
 

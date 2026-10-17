@@ -131,7 +131,7 @@ export const SKU_BUCKET: Record<StudySku, Bucket> = {
 };
 
 /**
- * Compute total credits for a study run per pricing.yaml v3 bucket formula.
+ * Compute total credits for a study run per the pricing.yaml bucket formula (unchanged in v4.0.0).
  * base_credits + max(0, sample_size - 100). No scaling below n=100.
  * For depth-interview (per-interview action billing), callers scale by turns.
  */
@@ -140,4 +140,17 @@ export function computeStudyCredits(sku: StudySku, sampleSize: number): number {
   return base + Math.max(0, sampleSize - 100);
 }
 
-export const USD_PER_CREDIT = 0.012;
+// pricing.yaml v4.0.0 (2026-10-17): the list rate is the Try pack, 5,000 credits for $150 ($0.030/credit).
+// Larger packs are cheaper (Team $0.025, Growth $0.020, Volume floor $0.015), so this is an upper bound.
+export const USD_PER_CREDIT = 0.03;
+
+// pricing.yaml v4.0.0 public packs and grants (reference for clients; no subscriptions).
+export const PRICING_VERSION = "4.0.0";
+export const STARTER_CREDITS = 4000; // granted on workspace approval, no card
+export const CREDIT_PACKS = [
+  { id: "try", credits: 5000, price_usd: 150 },
+  { id: "team", credits: 25000, price_usd: 625 },
+  { id: "growth", credits: 100000, price_usd: 2000 },
+] as const;
+export const VOLUME_FLOOR_PER_CREDIT = 0.015; // 500K+ credits, negotiated
+export const INTERVIEW_TIER_CREDITS = { quick_15: 300, standard_30: 500, deep_45: 800 } as const;

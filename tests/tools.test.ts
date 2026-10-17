@@ -50,21 +50,12 @@ describe("runStudySchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts all 26 SKUs", () => {
-    const skus = [
-      "concept-viability", "claim-credibility", "brand-identity-test",
-      "message-resonance", "price-sensitivity", "feature-priority",
-      "ad-copy", "b2b-committee", "conjoint", "iris-pulse",
-      // "polarization-stress-test" folded into PreFlight v2 — task #210 PST-FOLD-001 (2026-06-11)
-      "card-sort", "open-end", "ab-backlog",
-      "name-test", "founder-positioning", "ad-concept-resonance",
-      "depth-interview", "custom-study", "iat", "counterfactual-positioning",
-      "personalization-sensitivity", "regulated-claim-preflight",
-      "volume-forecast", "brand-tracker", "creative-audit",
-    ];
+  it("accepts every SKU that has a price (SKU_BUCKET)", async () => {
+    const { SKU_BUCKET } = await import("../src/types.js");
+    const skus = Object.keys(SKU_BUCKET);
+    expect(skus.length).toBeGreaterThan(15);
     for (const sku of skus) {
-      const result = runStudySchema.safeParse({ sku, inputs: {} });
-      expect(result.success, `SKU ${sku} should be valid`).toBe(true);
+      expect(runStudySchema.safeParse({ sku, inputs: {} }).success, `SKU ${sku} should be valid`).toBe(true);
     }
   });
 });
@@ -202,32 +193,46 @@ describe("estimateCostSchema + handleEstimateCost", () => {
     expect(estimateCostSchema.safeParse({ sku: "invalid-sku" }).success).toBe(false);
   });
 
-  it("calculates correct credits for concept-viability (3 credits × 50 = 150)", () => {
+  // pricing.yaml bucket formula (unchanged in v4.0.0): base + max(0, n - 100); USD at the v4 Try-pack rate $0.030.
+  it("concept-viability (light bucket, n=50) = 3,500 credits, $105 at the v4 list rate", () => {
     const result = handleEstimateCost({ sku: "concept-viability", sample_size: 50 });
-    expect(result.credits).toBe(150);
-    expect(result.usd_estimate).toBeCloseTo(1.80, 2);
+    expect(result.credits).toBe(3500);
+    expect(result.usd_estimate).toBeCloseTo(105.0, 2);
   });
 
-  it("calculates correct credits for b2b-committee (5 credits × 20 = 100)", () => {
+  it("b2b-committee (premium bucket, n=20) = 8,000 credits, $240", () => {
     const result = handleEstimateCost({ sku: "b2b-committee", sample_size: 20 });
-    expect(result.credits).toBe(100);
-    expect(result.usd_estimate).toBeCloseTo(1.20, 2);
+    expect(result.credits).toBe(8000);
+    expect(result.usd_estimate).toBeCloseTo(240.0, 2);
+  });
+
+  it("scales +1 credit per persona above n=100", () => {
+    expect(handleEstimateCost({ sku: "concept-viability", sample_size: 250 }).credits).toBe(3650);
   });
 
   it("uses default sample_size of 50 when not provided", () => {
     const result = handleEstimateCost({ sku: "claim-credibility" });
-    expect(result.credits).toBe(100); // 2 credits × 50
+    expect(result.credits).toBe(3500);
   });
 
   it("handles depth-interview credits with max_turns scaling", () => {
     const result = handleEstimateCost({ sku: "depth-interview", max_turns: 12 });
-    // base 8 credits × (12/12) = 8
-    expect(result.credits).toBe(8);
-    expect(result.usd_estimate).toBeCloseTo(0.10, 2);
+    expect(result.credits).toBe(2000); // pulse base × (12/12)
+    expect(result.usd_estimate).toBeCloseTo(60.0, 2);
   });
 
   it("depth-interview with 24 turns doubles cost", () => {
     const result = handleEstimateCost({ sku: "depth-interview", max_turns: 24 });
-    expect(result.credits).toBe(16); // 8 × (24/12)
+    expect(result.credits).toBe(4000);
+  });
+
+  it("carries the v4.0.0 public pricing constants", async () => {
+    const t = await import("../src/types.js");
+    expect(t.PRICING_VERSION).toBe("4.0.0");
+    expect(t.USD_PER_CREDIT).toBe(0.03);
+    expect(t.STARTER_CREDITS).toBe(4000);
+    expect(t.CREDIT_PACKS.map((p) => [p.credits, p.price_usd])).toEqual([[5000, 150], [25000, 625], [100000, 2000]]);
+    expect(t.VOLUME_FLOOR_PER_CREDIT).toBe(0.015);
+    expect(t.INTERVIEW_TIER_CREDITS).toEqual({ quick_15: 300, standard_30: 500, deep_45: 800 });
   });
 });
